@@ -1,4 +1,4 @@
-import Todo from "../model/user.model";
+import Todo from "../model/user.model.js";
 
 export const createTodo = async (req, res) => {
   const todo = new Todo({
