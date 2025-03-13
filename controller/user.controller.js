@@ -1,17 +1,6 @@
 import User from "../model/todo.model.js";
-import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSaveInCookies } from "../jwt/token.js";
-
-const userSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
-  username: z
-    .string()
-    .min(3, { message: "Username alteast 3 characters long" }),
-  password: z
-    .string()
-    .min(6, { message: "Password alteast 6 characters long" }),
-});
 
 export const register = async (req, res) => {
   try {
@@ -20,19 +9,32 @@ export const register = async (req, res) => {
     if (!email || !username || !password) {
       return res.status(400).json({ errors: "All fields are required" });
     }
-    const validation = userSchema.safeParse({ email, username, password });
-    if (!validation.success) {
-      const errorMessage = validation.error.errors.map((err) => err.message);
-      return res.status(400).json({ errors: errorMessage });
+
+    // Manual validation instead of Zod
+    const errors = [];
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      errors.push("Invalid email address");
+    }
+    if (username.length < 3) {
+      errors.push("Username must be at least 3 characters long");
+    }
+    if (password.length < 6) {
+      errors.push("Password must be at least 6 characters long");
+    }
+
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
     }
 
     const user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ errors: "User already registered" });
     }
+
     const hashPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ email, username, password: hashPassword });
     await newUser.save();
+
     if (newUser) {
       const token = await generateTokenAndSaveInCookies(newUser._id, res);
       res
