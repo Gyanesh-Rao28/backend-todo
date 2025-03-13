@@ -12,7 +12,7 @@ export const generateTokenAndSaveInCookies = async (userId, res) => {
     sameSite: "None", // Critical for cross-site requests
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
-
+  
   await User.findByIdAndUpdate(userId, { token });
   return token;
 };
