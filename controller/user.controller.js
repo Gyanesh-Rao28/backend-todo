@@ -1,4 +1,4 @@
-import User from "../model/todo.model.js";
+import User from "../model/user.model.js";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSaveInCookies } from "../jwt/token.js";
 
